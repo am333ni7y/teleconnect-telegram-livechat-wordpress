@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نصب‌کننده خودکار ورکر کلادفلر | TeleConnect Live Chat</title>
+  <style>
+    :root {
+      --primary: #0088cc;
+      --primary-dark: #006699;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Vazirmatn", Tahoma, sans-serif; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 680px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 35px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+    }
+    .header h1 {
+      margin: 0 0 10px;
+      font-size: 26px;
+      color: #38bdf8;
+    }
+    .header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.1);
+      color: #38bdf8;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .step-box {
+      margin-bottom: 25px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .step-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .step-num {
+      width: 26px;
+      height: 26px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px 14px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      direction: ltr;
+      text-align: left;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      border-color: var(--primary);
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #0088cc, #0284c7);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:hover {
+      opacity: 0.95;
+    }
+    .btn:active {
+      transform: scale(0.99);
+    }
+    .btn:disabled {
+      background: #475569;
+      cursor: not-allowed;
+    }
+    .help-link {
+      color: #38bdf8;
+      text-decoration: none;
+      font-size: 13px;
+      display: inline-block;
+      margin-top: 6px;
+    }
+    .help-link:hover {
+      text-decoration: underline;
+    }
+    #logs {
+      margin-top: 20px;
+      background: #090d16;
+      border-radius: 10px;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 13px;
+      direction: ltr;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      border: 1px solid var(--border);
+    }
+    .log-item { margin-bottom: 5px; }
+    .log-success { color: var(--success); }
+    .log-error { color: var(--danger); }
+    .log-info { color: #38bdf8; }
+    .result-box {
+      margin-top: 20px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success);
+      padding: 18px;
+      border-radius: 12px;
+      display: none;
+    }
+    .result-box h3 {
+      margin: 0 0 10px;
+      color: var(--success);
+    }
+    .result-box code {
+      background: #0f172a;
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: #38bdf8;
+      font-size: 14px;
+      user-select: all;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .footer a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <span class="badge">نصب هوشمند بدون کدنویسی</span>
+    <h1>ویزارد راه‌اندازی TeleConnect Live Chat</h1>
+    <p>این ویزارد ورکر اختصاصی کلادفلر و پایگاه‌داده KV را روی اکانت شما به صورت خودکار ایجاد کرده و آدرس آماده را به شما تحویل می‌دهد.</p>
+  </div>
+
+  <div class="step-box">
+    <div class="step-title">
+      <span class="step-num">۱</span>
+      توکن API کلادفلر (Cloudflare API Token)
+    </div>
+    <label for="cf_token">توکن با دسترسی‌های Workers Scripts:Edit و Workers KV Storage:Edit</label>
+    <input type="password" id="cf_token" placeholder="cfut_..." autocomplete="off">
+    <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" class="help-link">
+      🔗 دریافت توکن از پنل کلادفلر (کلیک کنید)
+    </a>
+  </div>
+
+  <div class="step-box">
+    <div class="step-title">
+      <span class="step-num">۲</span>
+      نام دلخواه برای ورکر (اختیاری)
+    </div>
+    <input type="text" id="worker_name" value="teleconnect-livechat" placeholder="teleconnect-livechat">
+  </div>
+
+  <button class="btn" id="deploy_btn">🚀 استقرار خودکار روی کلادفلر (Deploy)</button>
+
+  <div id="logs"></div>
+
+  <div id="result" class="result-box">
+    <h3>🎉 راه‌اندازی با موفقیت انجام شد!</h3>
+    <p>آدرس ورکر اختصاصی شما ساخته شد. این آدرس را در تنظیمات افزونه وردپرس وارد کنید:</p>
+    <div style="margin: 15px 0;">
+      <code id="worker_url_display"></code>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+      حالا کافی است وارد پیشخوان وردپرس > پشتیبانی تلگرام شوید و این آدرس را ذخیره کنید.
+    </p>
+  </div>
+
+  <div class="footer">
+    توسعه یافته با ❤️ توسط <a href="https://ameeen.ir" target="_blank">AMEEEN SEO</a> | مرجع وردپرس: <a href="https://wp-needs.com" target="_blank">WP-Needs.com</a>
+  </div>
+</div>
+
+<script>
+  const WORKER_SCRIPT_URL = '../worker/worker.js';
+
+  function log(msg, type = 'info') {
+    const logsEl = document.getElementById('logs');
+    logsEl.style.display = 'block';
+    const div = document.createElement('div');
+    div.className = `log-item log-${type}`;
+    div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logsEl.appendChild(div);
+    logsEl.scrollTop = logsEl.scrollHeight;
+  }
+
+  document.getElementById('deploy_btn').addEventListener('click', async () => {
+    const token = document.getElementById('cf_token').value.trim();
+    let workerName = document.getElementById('worker_name').value.trim() || 'teleconnect-livechat';
+    const btn = document.getElementById('deploy_btn');
+
+    if (!token) {
+      alert('لطفاً توکن کلادفلر خود را وارد کنید.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'در حال پردازش و راه‌اندازی...';
+    document.getElementById('logs').innerHTML = '';
+    document.getElementById('result').style.display = 'none';
+
+    try {
+      log('بررسی اعتبار توکن کلادفلر...');
+      const verifyRes = await fetch('https://api.cloudflare.com/client/v4/user/tokens/verify', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) throw new Error('توکن نامعتبر است: ' + (verifyData.errors[0]?.message || ''));
+      log('توکن تأیید شد.', 'success');
+
+      log('دریافت شناسه اکانت کلادفلر...');
+      const accRes = await fetch('https://api.cloudflare.com/client/v4/accounts', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const accData = await accRes.json();
+      if (!accData.result || accData.result.length === 0) throw new Error('هیچ اکانت فعالی برای این توکن پیدا نشد.');
+      const accountId = accData.result[0].id;
+      log(`شناسه اکانت: ${accountId}`, 'success');
+
+      log('بررسی و دریافت ساب‌دامین ورکر...');
+      const subRes = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/subdomain`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const subData = await subRes.json();
+      const subdomain = subData.result?.subdomain;
+      if (!subdomain) throw new Error('ساب‌دامین ورکر برای این اکانت فعال نیست.');
+      log(`ساب‌دامین: ${subdomain}.workers.dev`, 'success');
+
+      log('ایجاد پایگاه‌داده CHAT_KV...');
+      let kvId = null;
+      const kvListRes = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const kvListData = await kvListRes.json();
+      const existingKv = kvListData.result?.find(k => k.title === 'TELECONNECT_CHAT_KV');
+      
+      if (existingKv) {
+        kvId = existingKv.id;
+        log(`پایگاه‌داده موجود یافت شد: ${kvId}`, 'info');
+      } else {
+        const createKvRes = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'TELECONNECT_CHAT_KV' })
+        });
+        const createKvData = await createKvRes.json();
+        if (!createKvData.success) throw new Error('خطا در ایجاد KV: ' + createKvData.errors[0]?.message);
+        kvId = createKvData.result.id;
+        log(`پایگاه‌داده KV با موفقیت ساخته شد: ${kvId}`, 'success');
+      }
+
+      log('دریافت اسکریپت ورکر...');
+      const scriptRes = await fetch(WORKER_SCRIPT_URL);
+      const scriptContent = await scriptRes.text();
+
+      log(`استقرار ورکر ${workerName}...`);
+      const metadata = {
+        main_module: 'worker.js',
+        bindings: [
+          { type: 'kv_namespace', name: 'CHAT_KV', namespace_id: kvId }
+        ]
+      };
+
+      const formData = new FormData();
+      formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      formData.append('worker.js', new Blob([scriptContent], { type: 'application/javascript+module' }), 'worker.js');
+
+      const deployRes = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${workerName}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const deployData = await deployRes.json();
+      if (!deployData.success) throw new Error('خطا در استقرار ورکر: ' + deployData.errors[0]?.message);
+      log('ورکر با موفقیت مستقر شد!', 'success');
+
+      log('فعال‌سازی ساب‌دامین برای ورکر...');
+      await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${workerName}/subdomain`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: true })
+      });
+
+      const finalWorkerUrl = `https://${workerName}.${subdomain}.workers.dev`;
+      log(`عملیات با موفقیت پایان یافت! آدرس: ${finalWorkerUrl}`, 'success');
+
+      document.getElementById('worker_url_display').textContent = finalWorkerUrl;
+      document.getElementById('result').style.display = 'block';
+
+    } catch (err) {
+      log(err.message, 'error');
+      alert('خطا در مراحل نصب: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🚀 استقرار خودکار روی کلادفلر (Deploy)';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+/**
+ * Telegram Live Chat Widget Styles
+ * Clean, modern UI, fully RTL compatible, inherits site fonts seamlessly.
+ */
+
+:root {
+  --teleconnect-primary: #0088cc;
+  --teleconnect-primary-hover: #0077b5;
+  --teleconnect-bg: #ffffff;
+  --teleconnect-text: #222222;
+  --teleconnect-subtext: #707579;
+  --teleconnect-bubble-user: #e3f2fd;
+  --teleconnect-bubble-admin: #f1f3f4;
+  --teleconnect-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  --teleconnect-radius: 16px;
+}
+
+.teleconnect-root {
+  position: fixed;
+  z-index: 999999;
+  font-family: inherit !important;
+  direction: rtl;
+  text-align: right;
+  box-sizing: border-box;
+}
+
+.teleconnect-root *,
+.teleconnect-root *::before,
+.teleconnect-root *::after {
+  box-sizing: border-box;
+  font-family: inherit !important;
+}
+
+/* Positioning */
+.teleconnect-pos-bottom-right {
+  bottom: 24px;
+  right: 24px;
+}
+
+.teleconnect-pos-bottom-left {
+  bottom: 24px;
+  left: 24px;
+}
+
+/* Floating Trigger Button */
+.teleconnect-bubble {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--teleconnect-primary);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 136, 204, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
+  outline: none;
+}
+
+.teleconnect-bubble:hover {
+  transform: scale(1.08);
+}
+
+.teleconnect-bubble .teleconnect-icon-close {
+  display: none;
+}
+
+.teleconnect-root.teleconnect-open .teleconnect-bubble .teleconnect-icon-chat {
+  display: none;
+}
+
+.teleconnect-root.teleconnect-open .teleconnect-bubble .teleconnect-icon-close {
+  display: block;
+}
+
+.teleconnect-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #ff3b30;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  animation: teleconnect-pop 0.3s ease;
+}
+
+/* Modal Window */
+.teleconnect-modal {
+  position: absolute;
+  bottom: 75px;
+  width: 370px;
+  max-width: calc(100vw - 40px);
+  height: 520px;
+  max-height: calc(100vh - 120px);
+  background: var(--teleconnect-bg);
+  border-radius: var(--teleconnect-radius);
+  box-shadow: var(--teleconnect-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-origin: bottom right;
+  animation: teleconnect-scale-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.teleconnect-pos-bottom-left .teleconnect-modal {
+  right: auto;
+  left: 0;
+  transform-origin: bottom left;
+}
+
+.teleconnect-pos-bottom-right .teleconnect-modal {
+  right: 0;
+  left: auto;
+}
+
+/* Header */
+.teleconnect-header {
+  background: var(--teleconnect-primary);
+  color: #ffffff;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.teleconnect-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.teleconnect-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teleconnect-status-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  background: #00e676;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+
+.teleconnect-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.teleconnect-subtitle {
+  font-size: 11px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.teleconnect-header-close {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.teleconnect-header-close:hover {
+  opacity: 1;
+}
+
+/* Messages Body */
+.teleconnect-messages-body {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #f7f9fa;
+}
+
+.teleconnect-msg {
+  max-width: 82%;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.teleconnect-msg-user {
+  align-self: flex-start;
+  background: var(--teleconnect-primary);
+  color: #ffffff;
+  border-radius: 14px 14px 2px 14px;
+}
+
+.teleconnect-msg-admin {
+  align-self: flex-end;
+  background: #ffffff;
+  color: var(--teleconnect-text);
+  border-radius: 14px 14px 14px 2px;
+  border: 1px solid #ebebeb;
+}
+
+.teleconnect-msg-time {
+  font-size: 10px;
+  margin-top: 4px;
+  opacity: 0.7;
+  text-align: left;
+  direction: ltr;
+}
+
+.teleconnect-msg-user .teleconnect-msg-time {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.teleconnect-msg-admin .teleconnect-msg-time {
+  color: var(--teleconnect-subtext);
+}
+
+/* Input Area */
+.teleconnect-input-area {
+  padding: 12px;
+  background: #ffffff;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.teleconnect-input-area input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fdfdfd;
+}
+
+.teleconnect-input-area input:focus {
+  border-color: var(--teleconnect-primary);
+  background: #fff;
+}
+
+.teleconnect-input-area button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--teleconnect-primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.teleconnect-input-area button:hover {
+  transform: scale(1.05);
+}
+
+.teleconnect-input-area button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Animations */
+@keyframes teleconnect-scale-up {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes teleconnect-pop {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .teleconnect-modal {
+    width: calc(100vw - 32px);
+    height: calc(100vh - 100px);
+    bottom: 70px;
+    right: 0 !important;
+    left: 0 !important;
+    margin: 0 auto;
+  }
+  .teleconnect-pos-bottom-right,
+  .teleconnect-pos-bottom-left {
+    bottom: 16px;
+    right: 16px;
+  }
+}
