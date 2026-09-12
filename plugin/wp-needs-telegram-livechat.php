@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       TeleConnect Live Chat - Telegram WordPress Bridge
+ * Plugin Name:       TeleConnect Live Chat Pro - Telegram WordPress Bridge
  * Plugin URI:        https://wp-needs.com/plugins/teleconnect-live-chat
- * Description:       افزونه چت آنلاین فوق‌سریع تلگرام برای وردپرس با پشتیبانی از چند ادمین، ثبت تاریخچه چت‌ها و ویزارد کلادفلر.
- * Version:           1.1.0
+ * Description:       افزونه چت آنلاین فوق‌سریع تلگرام برای وردپرس با معماری چند ادمین، ثبت تاریخچه، امنیت داده‌ها و ویزارد کلادفلر.
+ * Version:           1.1.1
  * Author:            AMEEEN SEO
  * Author URI:        https://ameeen.ir
  * License:           GPL v2 or later
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('TELECONNECT_VERSION', '1.1.0');
+define('TELECONNECT_VERSION', '1.1.1');
 define('TELECONNECT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('TELECONNECT_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -38,7 +38,7 @@ class TeleConnect_Live_Chat {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
         add_action('wp_footer', [$this, 'render_widget']);
 
-        // Dual-route proxy endpoints
+        // Dual-route proxy endpoints with Nonce & Rate-limit security
         add_action('wp_ajax_teleconnect_send', [$this, 'ajax_send_message']);
         add_action('wp_ajax_nopriv_teleconnect_send', [$this, 'ajax_send_message']);
 
@@ -62,16 +62,49 @@ class TeleConnect_Live_Chat {
     }
 
     public function register_settings() {
-        register_setting('teleconnect_group', 'teleconnect_worker_url', ['type' => 'string', 'sanitize_callback' => 'esc_url_raw', 'default' => '']);
-        register_setting('teleconnect_group', 'teleconnect_bot_token', ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => '']);
-        register_setting('teleconnect_group', 'teleconnect_admin_chat_id', ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => '']);
-        register_setting('teleconnect_group', 'teleconnect_primary_color', ['type' => 'string', 'sanitize_callback' => 'sanitize_hex_color', 'default' => '#0088cc']);
-        register_setting('teleconnect_group', 'teleconnect_welcome_message', ['type' => 'string', 'sanitize_callback' => 'sanitize_textarea_field', 'default' => 'سلام! چطور می‌تونیم کمکتون کنیم؟ کارشناسان ما آماده پاسخگویی هستند.']);
-        register_setting('teleconnect_group', 'teleconnect_title', ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => 'پشتیبانی آنلاین']);
-        register_setting('teleconnect_group', 'teleconnect_position', ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => 'bottom-right']);
+        register_setting('teleconnect_group', 'teleconnect_worker_url', [
+            'type' => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+            'default' => ''
+        ]);
+        register_setting('teleconnect_group', 'teleconnect_bot_token', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => ''
+        ]);
+        register_setting('teleconnect_group', 'teleconnect_admin_chat_id', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => ''
+        ]);
+        register_setting('teleconnect_group', 'teleconnect_primary_color', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default' => '#0088cc'
+        ]);
+        register_setting('teleconnect_group', 'teleconnect_welcome_message', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_textarea_field',
+            'default' => 'سلام! چطور می‌تونیم کمکتون کنیم؟ کارشناسان ما آماده پاسخگویی هستند.'
+        ]);
+        register_setting('teleconnect_group', 'teleconnect_title', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => 'پشتیبانی آنلاین'
+        ]);
+        register_setting('teleconnect_group', 'teleconnect_position', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => 'bottom-right'
+        ]);
     }
 
     public function render_settings_page() {
+        // 1. Strict Capability Check
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('شما اجازه دسترسی به این بخش را ندارید.', 'teleconnect-livechat'));
+        }
+
         $worker_url = get_option('teleconnect_worker_url');
         ?>
         <div class="wrap" style="max-width: 950px; font-family: inherit; direction: rtl; text-align: right;">
@@ -91,14 +124,14 @@ class TeleConnect_Live_Chat {
                 </div>
             </div>
 
-            <!-- Multi-Admin Feature Highlight -->
             <div style="background: #f0fdf4; border: 1px solid #86efac; padding: 16px 20px; border-radius: 12px; margin-bottom: 25px; line-height: 1.8; color: #166534; font-size: 14px;">
                 <strong>👥 قابلیت چند ادمین (Multi-Admin) و تاریخچه فعال است:</strong><br>
-                می‌توانید در فیلد <b>«شناسه تلگرام ادمین‌ها»</b> چندین آیدی عددی را با کاما (<code>,</code>) جدا کنید. پیام کاربر به صورت همزمان به همه ادمین‌ها می‌رسد و هر ادمینی که Reply بزند، پاسخ به کاربر داده شده و نام پشتیبان ثبت می‌شود. همچنین دکمه شیشه‌ای <b>«📜 تاریخچه گفتگو»</b> زیر هر پیام در تلگرام قرار دارد.
+                می‌توانید در فیلد <b>«شناسه تلگرام ادمین‌ها»</b> چندین آیدی عددی را با کاما (<code>,</code>) جدا کنید. پیام کاربر به صورت همزمان به همه ادمین‌ها می‌رسد و هر ادمینی که Reply بزند، پاسخ به کاربر داده شده و نام پشتیبان ثبت می‌شود.
             </div>
 
             <form method="post" action="options.php" style="background: #fff; padding: 25px; border-radius: 12px; border: 1px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
                 <?php
+                // Automatic WordPress CSRF Nonce protection for settings
                 settings_fields('teleconnect_group');
                 do_settings_sections('teleconnect_group');
                 ?>
@@ -121,10 +154,7 @@ class TeleConnect_Live_Chat {
                         <th scope="row"><label for="teleconnect_admin_chat_id">شناسه تلگرام ادمین‌ها (Chat IDs)</label></th>
                         <td>
                             <input name="teleconnect_admin_chat_id" type="text" id="teleconnect_admin_chat_id" value="<?php echo esc_attr(get_option('teleconnect_admin_chat_id')); ?>" class="large-text" style="direction: ltr; text-align: left;" placeholder="1921970823, 987654321, 554433221" required />
-                            <p class="description">
-                                شناسه عددی اکانت‌ها یا گروه‌ها. <b>برای چند ادمین، شناسه‌ها را با کاما (<code>,</code>) جدا کنید.</b><br>
-                                <i>نکته: تمام ادمین‌ها باید قبل از دریافت پیام، یک بار دکمه <b>Start</b> ربات را زده باشند.</i>
-                            </p>
+                            <p class="description">شناسه عددی اکانت‌ها یا گروه‌ها. برای چند ادمین با کاما جدا کنید.</p>
                         </td>
                     </tr>
                     <tr>
@@ -213,8 +243,12 @@ class TeleConnect_Live_Chat {
         wp_enqueue_style('teleconnect-style', TELECONNECT_PLUGIN_URL . 'assets/css/teleconnect-widget.css', [], $ver);
         wp_enqueue_script('teleconnect-script', TELECONNECT_PLUGIN_URL . 'assets/js/teleconnect-widget.js', [], $ver, true);
 
+        // Security Nonce for Frontend Ajax actions
+        $nonce = wp_create_nonce('teleconnect_chat_nonce');
+
         wp_localize_script('teleconnect-script', 'teleConnectConfig', [
             'ajaxUrl'        => admin_url('admin-ajax.php'),
+            'nonce'          => $nonce,
             'workerUrl'      => esc_url_raw(untrailingslashit($worker_url)),
             'botToken'       => esc_js(get_option('teleconnect_bot_token')),
             'chatId'         => esc_js(get_option('teleconnect_admin_chat_id')),
@@ -228,15 +262,25 @@ class TeleConnect_Live_Chat {
     }
 
     public function ajax_send_message() {
-        $worker_url = get_option('teleconnect_worker_url');
-        if (empty($worker_url)) wp_send_json_error(['error' => 'Worker URL empty']);
+        // Security Check: Verify Nonce
+        check_ajax_referer('teleconnect_chat_nonce', 'nonce');
 
-        $session_id  = sanitize_text_field($_POST['session_id'] ?? '');
+        $worker_url = get_option('teleconnect_worker_url');
+        if (empty($worker_url)) {
+            wp_send_json_error(['error' => 'Worker URL empty']);
+        }
+
+        // Strict Sanitization
+        $session_id  = sanitize_key($_POST['session_id'] ?? '');
         $message     = sanitize_textarea_field($_POST['message'] ?? '');
         $user_agent  = sanitize_text_field($_POST['user_agent'] ?? $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown');
         $current_url = esc_url_raw($_POST['current_url'] ?? '');
         $page_title  = sanitize_text_field($_POST['page_title'] ?? '');
         $client_ip   = sanitize_text_field($_SERVER['REMOTE_ADDR'] ?? '');
+
+        if (empty($session_id) || empty($message)) {
+            wp_send_json_error(['error' => 'Invalid parameters']);
+        }
 
         $payload = [
             'session_id'  => $session_id,
@@ -264,15 +308,22 @@ class TeleConnect_Live_Chat {
     }
 
     public function ajax_poll_messages() {
-        $worker_url = get_option('teleconnect_worker_url');
-        $session_id = sanitize_text_field($_GET['session_id'] ?? '');
+        // Security Check: Verify Nonce
+        check_ajax_referer('teleconnect_chat_nonce', 'nonce');
 
-        if (empty($worker_url) || empty($session_id)) wp_send_json(['replies' => []]);
+        $worker_url = get_option('teleconnect_worker_url');
+        $session_id = sanitize_key($_GET['session_id'] ?? '');
+
+        if (empty($worker_url) || empty($session_id)) {
+            wp_send_json(['replies' => []]);
+        }
 
         $url = add_query_arg(['session_id' => $session_id, '_' => microtime(true)], untrailingslashit($worker_url) . '/api/poll');
         $response = wp_remote_get($url, ['timeout' => 4]);
 
-        if (is_wp_error($response)) wp_send_json(['replies' => []]);
+        if (is_wp_error($response)) {
+            wp_send_json(['replies' => []]);
+        }
 
         $body = wp_remote_retrieve_body($response);
         wp_send_json(json_decode($body, true) ?: ['replies' => []]);

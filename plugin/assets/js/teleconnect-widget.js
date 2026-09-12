@@ -2,6 +2,7 @@
  * TeleConnect Live Chat Pro Client Script
  * Developed by: AMEEEN SEO (ameeen.ir) | WP-Needs.com
  * Features:
+ * - WordPress CSRF Nonce Token Inclusion
  * - Duplicate Message Shield (Checks Unique Message ID before rendering)
  * - Realtime Fast Polling
  * - LocalStorage State Sync
@@ -128,7 +129,6 @@
   function appendMessage(sender, text, time, messageId) {
     const finalId = String(messageId || ('msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6)));
 
-    // Duplicate Shield: If already rendered, ignore!
     if (renderedMessageIds.has(finalId)) {
       return;
     }
@@ -186,7 +186,7 @@
 
     let sent = false;
 
-    // Send via Worker first
+    // Direct to worker first
     if (config.workerUrl) {
       try {
         const payload = {
@@ -214,11 +214,12 @@
       }
     }
 
-    // Fallback to internal WP endpoint
+    // WordPress AJAX fallback with CSRF Nonce Token
     if (!sent && config.ajaxUrl) {
       try {
         const formData = new FormData();
         formData.append('action', 'teleconnect_send');
+        formData.append('nonce', config.nonce || '');
         formData.append('session_id', sessionId);
         formData.append('message', text);
         formData.append('user_agent', navigator.userAgent);
@@ -254,7 +255,7 @@
       try {
         let replies = null;
 
-        // Try direct worker
+        // Try Worker
         try {
           const res = await fetch(`${config.workerUrl}/api/poll?session_id=${encodeURIComponent(sessionId)}&_=${Date.now()}`, {
             cache: 'no-store',
@@ -267,10 +268,10 @@
           }
         } catch (_) {}
 
-        // Fallback to WP Ajax
+        // Fallback to WP Ajax with Nonce
         if (replies === null && config.ajaxUrl) {
           try {
-            const res = await fetch(`${config.ajaxUrl}?action=teleconnect_poll&session_id=${encodeURIComponent(sessionId)}&_=${Date.now()}`, {
+            const res = await fetch(`${config.ajaxUrl}?action=teleconnect_poll&nonce=${encodeURIComponent(config.nonce || '')}&session_id=${encodeURIComponent(sessionId)}&_=${Date.now()}`, {
               cache: 'no-store',
             });
             if (res.ok) {
