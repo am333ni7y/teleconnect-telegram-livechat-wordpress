@@ -1,76 +1,87 @@
 # TeleConnect Live Chat Pro - افزونه چت آنلاین تلگرام وردپرس (بدون فیلترشکن)
 
+[![Version](https://img.shields.io/badge/Version-v1.1.0-blue.svg)](https://github.com/am333ni7y/teleconnect-telegram-livechat-wordpress/releases/latest)
+[![Download Plugin](https://img.shields.io/badge/Download-Latest%20ZIP-green.svg)](https://github.com/am333ni7y/teleconnect-telegram-livechat-wordpress/releases/latest)
+[![Cloud Wizard](https://img.shields.io/badge/Cloudflare%20Wizard-Online-orange.svg)](https://rough-hill-19fc.ameeenity.workers.dev/wizard)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
-[![WordPress Compatibility](https://img.shields.io/badge/WordPress-5.8%2B-blue)](https://wordpress.org)
-[![Cloudflare Edge](https://img.shields.io/badge/Cloudflare-Workers%20%26%20KV-orange)](https://workers.cloudflare.com)
 [![Developer: AMEEEN SEO](https://img.shields.io/badge/Developer-AMEEEN%20SEO-green)](https://ameeen.ir)
 [![Official Hub: WP-Needs](https://img.shields.io/badge/Sponsored%20by-WP--Needs.com-purple)](https://wp-needs.com)
 
-**TeleConnect Live Chat Pro** یک سیستم گفتگوی آنلاین فوق‌سریع و هوشمند برای وب‌سایت‌های وردپرسی است که کاربران را مستقیماً به ربات تلگرام ادمین‌ها متصل می‌کند. این سیستم با استفاده از ورکر اختصاصی کلادفلر و سیستم پیشرفته **Dual-Route Fallback**، به صورت ۱۰۰٪ تضمینی محدودیت‌های اینترنت ایران و فیلترینگ تلگرام را دور می‌زند؛ **بدون اینکه کاربر سایت نیازی به روشن کردن فیلترشکن داشته باشد.**
+**TeleConnect Live Chat Pro** یک افزونه حرفه‌ای و هوشمند برای وب‌سایت‌های وردپرسی است که امکان گفتگوی آنلاین و لحظه‌ای کاربران با پشتیبان‌های سایت در تلگرام را فراهم می‌کند. به کمک زیرساخت ابری کلادفلر و سیستم هوشمند **Dual-Route Fallback**، این افزونه بدون کوچک‌ترین اختلال یا کندی کار می‌کند و **کاربران داخل ایران نیازی به روشن کردن هیچ‌گونه فیلترشکنی برای ارسال یا دریافت پیام ندارند.**
 
-توسعه‌یافته با افتخار توسط **[AMEEEN SEO](https://ameeen.ir)** | اسپانسر و مرجع آموزش: **[وردپرس نیاز (WP-Needs.com)](https://wp-needs.com)**.
+توسعه‌یافته با افتخار توسط **[AMEEEN SEO](https://ameeen.ir)** | حامی و مرجع رسمی: **[وردپرس نیاز (WP-Needs.com)](https://wp-needs.com)**.
+
+---
+
+## 📥 دانلود سریع افزونه (نسخه آماده نصب)
+
+> [!IMPORTANT]
+> برای نصب افزونه، نیازی به دانلود سورس‌کد ندارید!  
+> مستقیماً وارد بخش **[Releases (انتشارها)](https://github.com/am333ni7y/teleconnect-telegram-livechat-wordpress/releases/latest)** شوید و فایل آماده `teleconnect-live-chat.zip` را دانلود کنید.
+
+---
+
+## 🧙‍♂️ ویزارد ابری راه‌اندازی کلادفلر (One-Click Setup)
+
+برای راحتی کاربران و رهایی از تنظیمات پیچیده، ویزارد ابری آنلاین آماده شده است:
+👉 **[ورود به ویزارد ابری خودکار TeleConnect](https://rough-hill-19fc.ameeenity.workers.dev/wizard)** 👈
+
+تنها با وارد کردن توکن API کلادفلر و زدن یک دکمه، ورکر اختصاصی و دیتابیس هوشمند KV بدون نیاز به کدنویسی روی اکانت شخصی شما مستقر شده و آدرس نهایی آماده اتصال به وردپرس به شما تحویل داده می‌شود.
 
 ---
 
 ## 🇮🇷 راهنمای جامع فارسی (Persian Documentation)
 
-### 🎯 کلمات کلیدی و کاربردها
+### 🎯 کلمات کلیدی
 - **چت آنلاین وردپرس در تلگرام**
 - **افزونه پشتیبانی تلگرام بدون نیاز به فیلترشکن برای کاربر**
-- **اتصال وردپرس به تلگرام از طریق Cloudflare Worker**
-- **پشتیبانی آنلاین چند ادمینی در تلگرام**
-- **لایو چت فوق‌سریع المنتور وردپرس**
+- **لایو چت فوق‌سریع وردپرس با ربات تلگرام**
+- **پشتیبانی آنلاین چند ادمین در تلگرام با تاریخچه پیام‌ها**
+- **پروکسی کلادفلر ورکر برای اتصال تلگرام به وردپرس**
 
 ---
 
-### ✨ قابلیت‌ها و مزایای رقابتی
+### ✨ قابلیت‌ها و ویژگی‌های کلیدی
 
-1. **🚀 اتصال ۱۰۰٪ بدون فیلترشکن:** کاربران شما با هر اپراتوری (ایرانسل، همراه اول، مخابرات و...) بدون هیچ اختلالی پیام ارسال و دریافت می‌کنند.
-2. **⚡ تأخیر نزدیک به صفر (زیر ۵۰ میلی‌ثانیه):** بهینه‌سازی شده با تکنولوژی حافظه موقت لبه (Cloudflare Edge KV) و پروتکل اتمیک برای جلوگیری از تکرار پیام‌ها.
-3. **👥 پشتیبانی همزمان از چند ادمین (Multi-Admin Broadcast):** امکان وارد کردن چندین Chat ID با کاما (` , `). پیام ورودی برای تمام ادمین‌ها ارسال شده و پاسخ هر ادمینی با نام او به کاربر سایت می‌رسد.
-4. **📜 تاریخچه هوشمند مکالمات (History Log):** دکمه شیشه‌ای درون تلگرام برای استخراج آنی ۳۰ پیام اخیر هر کاربر.
-5. **📱 ارسال کامل جزئیات کاربر به تلگرام:** آی‌پی واقعی، سیستم‌عامل، مرورگر، عنوان صفحه و لینک صفحه‌ای که کاربر در آن قرار دارد.
-6. **🧙‍♂️ ویزارد نصب ابری خودکار (Cloud Wizard):** صفحه گرافیکی برای ساخت و دیپلوی خودکار ورکر و دیتابیس با ۱ کلیک و بدون نیاز به دانش فنی.
-7. **🎨 سازگاری کامل با المنتور و قالب‌ها:** دارای ویجت اختصاصی و به ارث بردن خودکار فونت سایت (`font-family: inherit !important`).
-
----
-
-### 🛠️ راهنمای سریع راه‌اندازی (۲ دقیقه)
-
-#### گام ۱: ساخت ربات تلگرام
-1. در تلگرام وارد ربات رسمی [@BotFather](https://t.me/botfather) شوید و دستور `/newbot` را بزنید.
-2. توکن ربات (`Bot Token`) را کپی کنید.
-3. **مهم:** وارد ربات خود شوید و دکمه **Start** را بزنید تا ربات فعال شود.
-4. شناسه عددی اکانت خود (`Chat ID`) را از ربات [@userinfobot](https://t.me/userinfobot) دریافت کنید. (اگر چند ادمین هستید، تمام ادمین‌ها باید ربات را استارت بزنند).
-
-#### گام ۲: راه‌اندازی ورکر کلادفلر با ویزارد خودکار
-1. ویزارد اختصاصی را باز کنید (یا از طریق آدرس ورکر خودتان وارد `/wizard` شوید).
-2. توکن API کلادفلر خود را با دسترسی Workers وارد کنید.
-3. دکمه **«استقرار فوری (One-Click Deploy)»** را بزنید و آدرس نهایی ورکر را کپی کنید.
-
-#### گام ۳: نصب در وردپرس
-1. فایل `teleconnect-live-chat.zip` را در مسیر **پیشخوان > افزونه‌ها > افزودن** نصب و فعال کنید.
-2. در منوی **پشتیبانی تلگرام**:
-   - آدرس ورکر، توکن ربات و شناسه‌های ادمین (جداشده با کاما) را ذخیره کنید.
-   - دکمه **«تنظیم خودکار وب‌هوک»** را کلیک کنید.
-3. لذت ببرید! چت زنده اختصاصی شما آماده است.
+1. **🚀 تضمین اتصال بدون فیلترشکن:** کاربران با تمامی اینترنت‌ها (همراه اول، ایرانسل، رایتل، شاتل، مخابرات و...) بدون VPN پیام ارسال و دریافت می‌کنند.
+2. **👥 چند ادمینی همزمان (Multi-Admin Broadcast):** پیام‌های کاربران هم‌زمان به چند پشتیبان ارسال می‌شود و هر ادمینی که Reply بزند، پاسخ با نام پشتیبان برای کاربر ارسال خواهد شد.
+3. **📜 سابقه و تاریخچه گفتگو (Chat History):** دکمه شیشه‌ای درون تلگرام برای استخراج آنی ۳۰ پیام اخیر هر کاربر.
+4. **🛡️ سپر ضدتکرار پیام (Duplicate Shield):** جلوگیری قطعی از ارسال مجدد پیام‌های قبلی در گفتگوهای طولانی.
+5. **⚡ پاسخگویی در کمتر از ۵۰ میلی‌ثانیه:** سرعت فوق‌العاده با استفاده از دیتابیس ابری لبه (Cloudflare Edge KV).
+6. **📱 ارسال مشخصات کامل کاربر:** آی‌پی واقعی، سیستم‌عامل، مدل دستگاه، عنوان صفحه و لینکی که کاربر هم‌اکنون در آن حضور دارد.
+7. **🎨 کاملاً واکنش‌گرا با المنتور:** دارای ویجت اختصاصی المنتور و به ارث بردن خودکار فونت قالب سایت.
 
 ---
 
-## 🇬🇧 English Overview
+### 🛠️ مراحل راه‌اندازی (۲ دقیقه)
 
-**TeleConnect Live Chat Pro** is an open-source, ultra-fast live chat bridge that links WordPress website visitors directly to Telegram administrators. It is specifically engineered to bypass heavy censorship environments (like Iran) using serverless Cloudflare Workers and KV storage.
+#### ۱. ساخت ربات در تلگرام
+- در تلگرام وارد ربات [@BotFather](https://t.me/botfather) شوید و دستور `/newbot` را بزنید.
+- توکن ربات را کپی کنید.
+- **حتماً دکمه Start را در ربات بزنید** تا ربات شما را بشناسد.
+- شناسه عددی اکانت خود را از [@userinfobot](https://t.me/userinfobot) دریافت کنید. (اگر چند ادمین هستید، همه ادمین‌ها باید ربات را استارت بزنند).
 
-### Key Highlights
-- **No Client VPN Needed:** Works seamlessly even when Telegram is censored locally.
-- **Multi-Admin Routing:** Dispatches customer chats to multiple agents concurrently.
-- **Sub-50ms Message Delivery:** High-efficiency edge polling with automated atomic clearing.
-- **One-Click Cloud Setup Wizard:** Provision Cloudflare Workers and KV databases without touching command-line tools.
-- **Elementor Widget Included:** Visual drag-and-drop support that respects native typography.
+#### ۲. ساخت ورکر با ویزارد
+- وارد **[ویزارد ابری TeleConnect](https://rough-hill-19fc.ameeenity.workers.dev/wizard)** شوید.
+- توکن کلادفلر خود را وارد کرده و دکمه **استقرار فوری** را بزنید.
+- آدرس ورکر ساخته‌شده را کپی کنید.
+
+#### ۳. نصب افزونه در وردپرس
+- فایل زیپ را از بخش **[Releases](https://github.com/am333ni7y/teleconnect-telegram-livechat-wordpress/releases/latest)** دانلود کنید.
+- در پیشخوان وردپرس به بخش **افزونه‌ها > افزودن** رفته و فایل را آپلود و فعال کنید.
+- به منوی **پشتیبانی تلگرام** بروید:
+  - آدرس ورکر، توکن ربات و شناسه‌های ادمین (جداشده با کاما: `1921970823, 987654321`) را وارد و ذخیره کنید.
+  - روی دکمه **«تنظیم خودکار وب‌هوک»** کلیک کنید.
 
 ---
 
-## 📄 License & Attribution
-- **Author & Lead Developer:** [AMEEEN SEO](https://ameeen.ir)
-- **Official Portal & Knowledgebase:** [WP-Needs.com (وردپرس نیاز)](https://wp-needs.com)
-- **License:** GNU General Public License v2.0 (GPLv2)
+## 🇬🇧 English Summary
+
+**TeleConnect Live Chat Pro** is an enterprise-grade, zero-delay live chat solution linking WordPress website visitors directly with multiple Telegram administrators. It is specifically designed to bypass strict network censorship (such as in Iran) via serverless Cloudflare Workers without requiring visitors to use a VPN.
+
+### Quick Links
+- **Download Latest ZIP:** [Releases Page](https://github.com/am333ni7y/teleconnect-telegram-livechat-wordpress/releases/latest)
+- **Live Setup Wizard:** [Cloudflare Cloud Wizard](https://rough-hill-19fc.ameeenity.workers.dev/wizard)
+- **Developer:** [AMEEEN SEO](https://ameeen.ir)
+- **Knowledgebase:** [WP-Needs.com](https://wp-needs.com)
+- **License:** GNU General Public License v2.0
