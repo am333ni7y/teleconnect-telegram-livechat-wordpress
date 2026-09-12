@@ -1,6 +1,6 @@
 # TeleConnect Live Chat Pro - افزونه چت آنلاین تلگرام وردپرس (بدون فیلترشکن)
 
-[![Version](https://img.shields.io/badge/Version-v1.1.0-blue.svg)](https://github.com/am333ni7y/teleconnect-telegram-livechat-wordpress/releases/latest)
+[![Version](https://img.shields.io/badge/Version-v1.1.2-blue.svg)](https://github.com/am333ni7y/teleconnect-telegram-livechat-wordpress/releases/latest)
 [![Download Plugin](https://img.shields.io/badge/Download-Latest%20ZIP-green.svg)](https://github.com/am333ni7y/teleconnect-telegram-livechat-wordpress/releases/latest)
 [![Cloud Wizard](https://img.shields.io/badge/Cloudflare%20Wizard-Online-orange.svg)](https://rough-hill-19fc.ameeenity.workers.dev/wizard)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)

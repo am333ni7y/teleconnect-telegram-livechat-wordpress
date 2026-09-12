@@ -253,29 +253,38 @@
 
 <script>
   // Embedded Worker Code for 100% self-contained execution
-  const WORKER_CODE = `/**
- * Cloudflare Worker: Telegram Live Chat Bridge
+  const WORKER_CODE = `
+/**
+ * Cloudflare Worker: Telegram Live Chat Bridge Pro (Security Hardened)
  * Developed by AMEEEN SEO (ameeen.ir) | WP-Needs.com
  */
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const origin = request.headers.get('Origin') || '*';
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, X-WP-Site-Auth',
     };
     if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
     if (url.pathname === '/' || url.pathname === '/health') {
-      return new Response(JSON.stringify({ status: 'online', service: 'TeleConnect Worker', kv: !!(env && env.CHAT_KV) }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ status: 'online', service: 'TeleConnect Pro Worker', kv: !!(env && env.CHAT_KV) }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
     if (url.pathname === '/set-webhook' && request.method === 'POST') {
       try {
         const body = await request.json();
-        const botToken = body.bot_token;
+        const botToken = body.bot_token || env.BOT_TOKEN;
         if (!botToken) return new Response(JSON.stringify({ error: 'bot_token required' }), { status: 400, headers: corsHeaders });
-        const webhookEndpoint = url.origin + '/telegram-webhook';
-        const tgRes = await fetch('https://api.telegram.org/bot' + botToken + '/setWebhook?url=' + encodeURIComponent(webhookEndpoint));
+        if (env && env.CHAT_KV) {
+          await env.CHAT_KV.put('config:bot_token', botToken, { expirationTtl: 31536000 });
+        }
+        const secretToken = 'tc_' + crypto.randomUUID().replace(/-/g, '');
+        if (env && env.CHAT_KV) {
+          await env.CHAT_KV.put('config:webhook_secret', secretToken, { expirationTtl: 31536000 });
+        }
+        const webhookEndpoint = url.origin + '/telegram-webhook?token=' + encodeURIComponent(botToken);
+        const tgRes = await fetch('https://api.telegram.org/bot' + botToken + '/setWebhook?url=' + encodeURIComponent(webhookEndpoint) + '&secret_token=' + secretToken);
         const tgJson = await tgRes.json();
         return new Response(JSON.stringify(tgJson), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       } catch (err) {
@@ -284,49 +293,115 @@ export default {
     }
     if (url.pathname === '/api/send' && request.method === 'POST') {
       try {
-        const data = await request.json();
-        const { session_id, message, bot_token, chat_id, user_agent = 'نامشخص', current_url = '', page_title = '' } = data;
         const clientIp = request.headers.get('cf-connecting-ip') || 'Unknown IP';
+        if (env && env.CHAT_KV) {
+          const rateKey = 'rate:' + clientIp + ':' + Math.floor(Date.now() / 60000);
+          const currentCount = parseInt((await env.CHAT_KV.get(rateKey)) || '0', 10);
+          if (currentCount >= 20) {
+            return new Response(JSON.stringify({ error: 'درخواست بیش از حد مجاز. لطفاً یک دقیقه بعد تلاش کنید.' }), { status: 429, headers: corsHeaders });
+          }
+          await env.CHAT_KV.put(rateKey, String(currentCount + 1), { expirationTtl: 65 });
+        }
+        const data = await request.json();
+        let { session_id, message, bot_token, chat_id, user_agent = 'نامشخص', current_url = '', page_title = '' } = data;
+        if (!bot_token && env && env.CHAT_KV) bot_token = await env.CHAT_KV.get('config:bot_token');
+        if (!chat_id && env && env.CHAT_KV) chat_id = await env.CHAT_KV.get('config:chat_id');
+        if (!session_id || !message || !bot_token || !chat_id) {
+          return new Response(JSON.stringify({ error: 'Missing parameters' }), { status: 400, headers: corsHeaders });
+        }
+        if (chat_id && env && env.CHAT_KV) await env.CHAT_KV.put('config:chat_id', String(chat_id), { expirationTtl: 31536000 });
         const userCountry = request.headers.get('cf-ipcountry') || 'IR';
+        const timeStr = new Date().toLocaleTimeString('fa-IR', { timeZone: 'Asia/Tehran' });
+        if (env && env.CHAT_KV) {
+          const historyKey = 'history:' + session_id;
+          let history = [];
+          try {
+            const rawHist = await env.CHAT_KV.get(historyKey);
+            if (rawHist) history = JSON.parse(rawHist);
+          } catch (_) {}
+          history.push({ role: 'user', text: message, time: timeStr, timestamp: Date.now() });
+          await env.CHAT_KV.put(historyKey, JSON.stringify(history.slice(-30)), { expirationTtl: 604800 });
+        }
+        const adminIds = String(chat_id).split(',').map(id => id.trim()).filter(Boolean);
+        function esc(t) { if (!t) return ''; return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
         const tgCard = '📩 <b>پیام جدید از کاربر آنلاین</b>\\n\\n' +
           '👤 <b>شناسه:</b> <code>' + session_id + '</code>\\n' +
-          '🌐 <b>صفحه:</b> <a href="' + current_url + '">' + (page_title || current_url || 'صفحه اصلی') + '</a>\\n' +
-          '💻 <b>سیستم:</b> <code>' + user_agent.substring(0, 60) + '</code>\\n' +
+          '🌐 <b>صفحه:</b> <a href=\"' + esc(current_url) + '\">' + esc(page_title || current_url || 'صفحه اصلی') + '</a>\\n' +
+          '💻 <b>سیستم:</b> <code>' + esc(user_agent.substring(0, 60)) + '</code>\\n' +
           '📍 <b>آی‌پی:</b> <code>' + clientIp + '</code> (' + userCountry + ')\\n' +
-          '⏰ <b>زمان:</b> ' + new Date().toLocaleTimeString('fa-IR', { timeZone: 'Asia/Tehran' }) + '\\n' +
+          '⏰ <b>زمان:</b> ' + timeStr + '\\n' +
           '───────────────────\\n' +
-          '<b>متن پیام:</b>\\n' + message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\\n\\n' +
+          '<b>متن پیام:</b>\\n' + esc(message) + '\\n\\n' +
           '<i>💡 برای پاسخ، روی همین پیام Reply بزنید.</i>';
-        const tgRes = await fetch('https://api.telegram.org/bot' + bot_token + '/sendMessage', {
+        const inlineKeyboard = { inline_keyboard: [[{ text: '📜 تاریخچه گفتگو با این کاربر', callback_data: 'hist_' + session_id }]] };
+        const broadcastPromises = adminIds.map(adminChatId => fetch('https://api.telegram.org/bot' + bot_token + '/sendMessage', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id, text: tgCard, parse_mode: 'HTML', disable_web_page_preview: true }),
-        });
-        const tgResult = await tgRes.json();
-        if (!tgResult.ok) return new Response(JSON.stringify({ error: tgResult.description }), { status: 502, headers: corsHeaders });
-        return new Response(JSON.stringify({ success: true, message_id: tgResult.result.message_id }), { headers: corsHeaders });
+          body: JSON.stringify({ chat_id: adminChatId, text: tgCard, parse_mode: 'HTML', disable_web_page_preview: true, reply_markup: inlineKeyboard })
+        }));
+        await Promise.all(broadcastPromises);
+        return new Response(JSON.stringify({ success: true, broadcast_count: adminIds.length }), { headers: corsHeaders });
       } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders });
       }
     }
     if (url.pathname === '/telegram-webhook') {
       try {
+        if (env && env.CHAT_KV) {
+          const expectedSecret = await env.CHAT_KV.get('config:webhook_secret');
+          const incomingSecret = request.headers.get('X-Telegram-Bot-Api-Secret-Token');
+          if (expectedSecret && incomingSecret && expectedSecret !== incomingSecret) {
+            return new Response('Forbidden', { status: 403 });
+          }
+        }
         const update = await request.json();
+        function esc(t) { if (!t) return ''; return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+        if (update.callback_query) {
+          const cb = update.callback_query;
+          const cbData = cb.data || '';
+          let botTokenMatch = (url.searchParams.get('token') || '').trim();
+          if (!botTokenMatch && env && env.CHAT_KV) botTokenMatch = await env.CHAT_KV.get('config:bot_token');
+          if (cbData.startsWith('hist_')) {
+            const targetSessionId = cbData.replace('hist_', '').trim();
+            let historyText = '📜 <b>تاریخچه مکالمات کاربر (' + targetSessionId + '):</b>\\n\\n';
+            if (env && env.CHAT_KV) {
+              const rawHist = await env.CHAT_KV.get('history:' + targetSessionId);
+              if (rawHist) {
+                const history = JSON.parse(rawHist);
+                history.forEach(h => {
+                  const icon = h.role === 'user' ? '👤 کاربر' : '👨‍💻 پشتیبان';
+                  historyText += '[' + esc(h.time) + '] <b>' + icon + ':</b>\\n' + esc(h.text) + '\\n\\n';
+                });
+              } else {
+                historyText += 'هیچ پیامی در سابقه این کاربر ثبت نشده است.\\n';
+              }
+            }
+            if (botTokenMatch) {
+              await fetch('https://api.telegram.org/bot' + botTokenMatch + '/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: cb.message.chat.id, text: historyText, parse_mode: 'HTML' })
+              });
+              await fetch('https://api.telegram.org/bot' + botTokenMatch + '/answerCallbackQuery', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ callback_query_id: cb.id })
+              });
+            }
+          }
+          return new Response('OK', { status: 200 });
+        }
         const msg = update.message;
         if (msg && msg.reply_to_message) {
           const repliedText = msg.reply_to_message.text || '';
           const replyText = msg.text || '';
+          const adminSenderName = msg.from ? msg.from.first_name : 'پشتیبان';
           let targetSessionId = null;
           const match = repliedText.match(/شناسه:\\s*([a-zA-Z0-9_-]+)/);
           if (match && match[1]) targetSessionId = match[1].trim();
           if (targetSessionId && replyText && env && env.CHAT_KV) {
-            const replyObj = {
-              id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-              text: replyText,
-              sender: 'admin',
-              timestamp: Date.now(),
-              time_fa: new Date().toLocaleTimeString('fa-IR', { timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit' }),
-            };
+            const timeFa = new Date().toLocaleTimeString('fa-IR', { timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit' });
+            const replyObj = { id: 'adm_msg_' + msg.message_id + '_' + Date.now(), text: replyText, sender: 'admin', admin_name: adminSenderName, timestamp: Date.now(), time_fa: timeFa };
             const queueKey = 'replies:' + targetSessionId;
             let existing = [];
             try {
@@ -335,6 +410,14 @@ export default {
             } catch (_) {}
             existing.push(replyObj);
             await env.CHAT_KV.put(queueKey, JSON.stringify(existing), { expirationTtl: 86400 });
+            const historyKey = 'history:' + targetSessionId;
+            let hist = [];
+            try {
+              const rawHist = await env.CHAT_KV.get(historyKey);
+              if (rawHist) hist = JSON.parse(rawHist);
+            } catch (_) {}
+            hist.push({ role: 'admin', admin: adminSenderName, text: replyText, time: timeFa, timestamp: Date.now() });
+            await env.CHAT_KV.put(historyKey, JSON.stringify(hist.slice(-30)), { expirationTtl: 604800 });
           }
         }
         return new Response('OK', { status: 200 });
@@ -352,17 +435,20 @@ export default {
           const raw = await env.CHAT_KV.get(queueKey);
           if (raw) {
             replies = JSON.parse(raw);
-            if (replies.length > 0) await env.CHAT_KV.delete(queueKey);
+            if (replies.length > 0) {
+              await env.CHAT_KV.put(queueKey, '[]', { expirationTtl: 300 });
+            }
           }
         } catch (_) {}
       }
       return new Response(JSON.stringify({ replies }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' }
       });
     }
     return new Response('Not Found', { status: 404, headers: corsHeaders });
   }
-};`;
+};
+`;
 
   function log(msg, type = 'info') {
     const logsEl = document.getElementById('logs');

@@ -1,6 +1,8 @@
 <?php
 /**
  * Elementor Live Chat Trigger Widget
+ *
+ * @package TeleConnect_Live_Chat
  */
 
 if (!defined('ABSPATH')) {
@@ -34,16 +36,16 @@ class TeleConnect_Elementor_Widget extends \Elementor\Widget_Base {
             'content_section',
             [
                 'label' => 'محتوا',
-                'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
+                'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
             ]
         );
 
         $this->add_control(
             'button_text',
             [
-                'label' => 'متن دکمه',
-                'type' => \Elementor\Controls_Manager::TEXT,
-                'default' => 'شروع گفتگو با کارشناس',
+                'label'       => 'متن دکمه',
+                'type'        => \Elementor\Controls_Manager::TEXT,
+                'default'     => 'شروع گفتگو با کارشناس',
                 'placeholder' => 'متن دکمه را وارد کنید',
             ]
         );
@@ -51,10 +53,10 @@ class TeleConnect_Elementor_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'button_icon',
             [
-                'label' => 'آیکون',
-                'type' => \Elementor\Controls_Manager::ICONS,
+                'label'   => 'آیکون',
+                'type'    => \Elementor\Controls_Manager::ICONS,
                 'default' => [
-                    'value' => 'fab fa-telegram-plane',
+                    'value'   => 'fab fa-telegram-plane',
                     'library' => 'fa-brands',
                 ],
             ]
@@ -67,14 +69,14 @@ class TeleConnect_Elementor_Widget extends \Elementor\Widget_Base {
             'style_section',
             [
                 'label' => 'استایل دکمه',
-                'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+                'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
             ]
         );
 
         $this->add_group_control(
             \Elementor\Group_Control_Typography::get_type(),
             [
-                'name' => 'typography',
+                'name'     => 'typography',
                 'selector' => '{{WRAPPER}} .teleconnect-elementor-btn',
             ]
         );
@@ -82,9 +84,9 @@ class TeleConnect_Elementor_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'text_color',
             [
-                'label' => 'رنگ متن',
-                'type' => \Elementor\Controls_Manager::COLOR,
-                'default' => '#ffffff',
+                'label'     => 'رنگ متن',
+                'type'      => \Elementor\Controls_Manager::COLOR,
+                'default'   => '#ffffff',
                 'selectors' => [
                     '{{WRAPPER}} .teleconnect-elementor-btn' => 'color: {{VALUE}};',
                 ],
@@ -94,8 +96,8 @@ class TeleConnect_Elementor_Widget extends \Elementor\Widget_Base {
         $this->add_group_control(
             \Elementor\Group_Control_Background::get_type(),
             [
-                'name' => 'background',
-                'types' => ['classic', 'gradient'],
+                'name'     => 'background',
+                'types'    => ['classic', 'gradient'],
                 'selector' => '{{WRAPPER}} .teleconnect-elementor-btn',
             ]
         );
@@ -103,7 +105,7 @@ class TeleConnect_Elementor_Widget extends \Elementor\Widget_Base {
         $this->add_group_control(
             \Elementor\Group_Control_Border::get_type(),
             [
-                'name' => 'border',
+                'name'     => 'border',
                 'selector' => '{{WRAPPER}} .teleconnect-elementor-btn',
             ]
         );
@@ -111,10 +113,10 @@ class TeleConnect_Elementor_Widget extends \Elementor\Widget_Base {
         $this->add_control(
             'border_radius',
             [
-                'label' => 'گوشه‌های گرد (Border Radius)',
-                'type' => \Elementor\Controls_Manager::DIMENSIONS,
+                'label'      => 'گوشه‌های گرد (Border Radius)',
+                'type'       => \Elementor\Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', '%'],
-                'selectors' => [
+                'selectors'  => [
                     '{{WRAPPER}} .teleconnect-elementor-btn' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
@@ -123,10 +125,10 @@ class TeleConnect_Elementor_Widget extends \Elementor\Widget_Base {
         $this->add_responsive_control(
             'padding',
             [
-                'label' => 'فاصله درونی (Padding)',
-                'type' => \Elementor\Controls_Manager::DIMENSIONS,
+                'label'      => 'فاصله درونی (Padding)',
+                'type'       => \Elementor\Controls_Manager::DIMENSIONS,
                 'size_units' => ['px', 'em', '%'],
-                'selectors' => [
+                'selectors'  => [
                     '{{WRAPPER}} .teleconnect-elementor-btn' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                 ],
             ]
@@ -139,7 +141,7 @@ class TeleConnect_Elementor_Widget extends \Elementor\Widget_Base {
         $settings = $this->get_settings_for_display();
         ?>
         <div class="teleconnect-elementor-wrapper">
-            <button type="button" class="teleconnect-elementor-btn" onclick="if(window.tlChatOpen){window.tlChatOpen();}return false;">
+            <button type="button" class="teleconnect-elementor-btn" onclick="if(window.teleConnectOpen){window.teleConnectOpen();}return false;">
                 <?php if (!empty($settings['button_icon']['value'])) : ?>
                     <span class="teleconnect-btn-icon">
                         <?php \Elementor\Icons_Manager::render_icon($settings['button_icon'], ['aria-hidden' => 'true']); ?>

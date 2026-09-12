@@ -2,10 +2,11 @@
  * TeleConnect Live Chat Pro Client Script
  * Developed by: AMEEEN SEO (ameeen.ir) | WP-Needs.com
  * Features:
- * - WordPress CSRF Nonce Token Inclusion
+ * - Cryptographically Secure Session ID (CSPRNG via crypto.getRandomValues)
+ * - Zero Secrets in Client: No bot_token or chat_id exposed
+ * - WordPress CSRF Nonce Token Protection
  * - Duplicate Message Shield (Checks Unique Message ID before rendering)
- * - Realtime Fast Polling
- * - LocalStorage State Sync
+ * - Dual-Route Delivery with Automatic Fallback
  */
 
 (function () {
@@ -17,9 +18,16 @@
   const STORAGE_KEY_SESSION = 'teleconnect_session_id';
   const STORAGE_KEY_MSGS = 'teleconnect_messages_cache';
 
+  // 1. Cryptographically Secure Session ID Generation (CSPRNG)
   let sessionId = localStorage.getItem(STORAGE_KEY_SESSION);
-  if (!sessionId) {
-    sessionId = 'usr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+  if (!sessionId || !sessionId.startsWith('usr_')) {
+    if (window.crypto && window.crypto.getRandomValues) {
+      const arr = new Uint8Array(16);
+      window.crypto.getRandomValues(arr);
+      sessionId = 'usr_' + Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+    } else {
+      sessionId = 'usr_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    }
     localStorage.setItem(STORAGE_KEY_SESSION, sessionId);
   }
 
@@ -186,36 +194,8 @@
 
     let sent = false;
 
-    // Direct to worker first
-    if (config.workerUrl) {
-      try {
-        const payload = {
-          session_id: sessionId,
-          message: text,
-          bot_token: config.botToken,
-          chat_id: config.chatId,
-          user_agent: navigator.userAgent,
-          current_url: window.location.href,
-          page_title: document.title,
-        };
-
-        const res = await fetch(config.workerUrl + '/api/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        const data = await res.json();
-        if (data.success) {
-          sent = true;
-        }
-      } catch (err) {
-        sent = false;
-      }
-    }
-
-    // WordPress AJAX fallback with CSRF Nonce Token
-    if (!sent && config.ajaxUrl) {
+    // Secure WordPress AJAX Endpoint (Zero client secrets exposed)
+    if (config.ajaxUrl) {
       try {
         const formData = new FormData();
         formData.append('action', 'teleconnect_send');
@@ -241,6 +221,32 @@
       }
     }
 
+    // Direct Worker Fallback if WP AJAX fails and worker endpoint supports session-only dispatch
+    if (!sent && config.workerUrl) {
+      try {
+        const payload = {
+          session_id: sessionId,
+          message: text,
+          user_agent: navigator.userAgent,
+          current_url: window.location.href,
+          page_title: document.title,
+        };
+
+        const res = await fetch(config.workerUrl + '/api/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          sent = true;
+        }
+      } catch (err) {
+        sent = false;
+      }
+    }
+
     sendBtn.disabled = false;
     inputEl.focus();
   }
@@ -255,20 +261,22 @@
       try {
         let replies = null;
 
-        // Try Worker
-        try {
-          const res = await fetch(`${config.workerUrl}/api/poll?session_id=${encodeURIComponent(sessionId)}&_=${Date.now()}`, {
-            cache: 'no-store',
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data && Array.isArray(data.replies)) {
-              replies = data.replies;
+        // Try direct worker edge query first (Under 50ms)
+        if (config.workerUrl) {
+          try {
+            const res = await fetch(`${config.workerUrl}/api/poll?session_id=${encodeURIComponent(sessionId)}&_=${Date.now()}`, {
+              cache: 'no-store',
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data && Array.isArray(data.replies)) {
+                replies = data.replies;
+              }
             }
-          }
-        } catch (_) {}
+          } catch (_) {}
+        }
 
-        // Fallback to WP Ajax with Nonce
+        // Fallback to secure WP Ajax with Nonce
         if (replies === null && config.ajaxUrl) {
           try {
             const res = await fetch(`${config.ajaxUrl}?action=teleconnect_poll&nonce=${encodeURIComponent(config.nonce || '')}&session_id=${encodeURIComponent(sessionId)}&_=${Date.now()}`, {

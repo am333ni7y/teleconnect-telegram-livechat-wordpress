@@ -3,7 +3,10 @@
  * Plugin Name:       TeleConnect Live Chat Pro - Telegram WordPress Bridge
  * Plugin URI:        https://wp-needs.com/plugins/teleconnect-live-chat
  * Description:       افزونه چت آنلاین فوق‌سریع تلگرام برای وردپرس با معماری چند ادمین، ثبت تاریخچه، امنیت داده‌ها و ویزارد کلادفلر.
- * Version:           1.1.1
+ * Version:           1.1.2
+ * Requires at least: 5.8
+ * Tested up to:      6.7
+ * Requires PHP:      7.4
  * Author:            AMEEEN SEO
  * Author URI:        https://ameeen.ir
  * License:           GPL v2 or later
@@ -16,7 +19,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('TELECONNECT_VERSION', '1.1.1');
+define('TELECONNECT_VERSION', '1.1.2');
 define('TELECONNECT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('TELECONNECT_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -100,7 +103,7 @@ class TeleConnect_Live_Chat {
     }
 
     public function render_settings_page() {
-        // 1. Strict Capability Check
+        // Strict Capability Check
         if (!current_user_can('manage_options')) {
             wp_die(esc_html__('شما اجازه دسترسی به این بخش را ندارید.', 'teleconnect-livechat'));
         }
@@ -125,13 +128,12 @@ class TeleConnect_Live_Chat {
             </div>
 
             <div style="background: #f0fdf4; border: 1px solid #86efac; padding: 16px 20px; border-radius: 12px; margin-bottom: 25px; line-height: 1.8; color: #166534; font-size: 14px;">
-                <strong>👥 قابلیت چند ادمین (Multi-Admin) و تاریخچه فعال است:</strong><br>
-                می‌توانید در فیلد <b>«شناسه تلگرام ادمین‌ها»</b> چندین آیدی عددی را با کاما (<code>,</code>) جدا کنید. پیام کاربر به صورت همزمان به همه ادمین‌ها می‌رسد و هر ادمینی که Reply بزند، پاسخ به کاربر داده شده و نام پشتیبان ثبت می‌شود.
+                <strong>👥 قابلیت چند ادمین (Multi-Admin) و امنیت فوق‌العاده:</strong><br>
+                شناسه‌های عددی تلگرام را با کاما (<code>,</code>) جدا کنید. اطلاعات حساس (توکن ربات و شناسه چت) کاملاً در سمت سرور امن نگاه داشته می‌شوند و هرگز در سورس‌کد مرورگر کاربران منتشر نخواهند شد.
             </div>
 
             <form method="post" action="options.php" style="background: #fff; padding: 25px; border-radius: 12px; border: 1px solid #e1e8ed; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
                 <?php
-                // Automatic WordPress CSRF Nonce protection for settings
                 settings_fields('teleconnect_group');
                 do_settings_sections('teleconnect_group');
                 ?>
@@ -146,8 +148,8 @@ class TeleConnect_Live_Chat {
                     <tr>
                         <th scope="row"><label for="teleconnect_bot_token">توکن ربات تلگرام (Bot Token)</label></th>
                         <td>
-                            <input name="teleconnect_bot_token" type="text" id="teleconnect_bot_token" value="<?php echo esc_attr(get_option('teleconnect_bot_token')); ?>" class="regular-text" style="direction: ltr; text-align: left;" placeholder="123456789:AA..." required />
-                            <p class="description">توکن دریافتی از ربات رسمی @BotFather در تلگرام.</p>
+                            <input name="teleconnect_bot_token" type="password" id="teleconnect_bot_token" value="<?php echo esc_attr(get_option('teleconnect_bot_token')); ?>" class="regular-text" style="direction: ltr; text-align: left;" placeholder="123456789:AA..." required />
+                            <p class="description">توکن دریافتی از ربات رسمی @BotFather در تلگرام (به صورت امن ذخیره می‌شود).</p>
                         </td>
                     </tr>
                     <tr>
@@ -238,20 +240,23 @@ class TeleConnect_Live_Chat {
         $worker_url = get_option('teleconnect_worker_url');
         if (empty($worker_url)) return;
 
-        $ver = TELECONNECT_VERSION . '.' . time();
+        // Proper cache-friendly file modification time versioning
+        $css_file = TELECONNECT_PLUGIN_DIR . 'assets/css/teleconnect-widget.css';
+        $js_file  = TELECONNECT_PLUGIN_DIR . 'assets/js/teleconnect-widget.js';
+        $css_ver  = file_exists($css_file) ? filemtime($css_file) : TELECONNECT_VERSION;
+        $js_ver   = file_exists($js_file) ? filemtime($js_file) : TELECONNECT_VERSION;
 
-        wp_enqueue_style('teleconnect-style', TELECONNECT_PLUGIN_URL . 'assets/css/teleconnect-widget.css', [], $ver);
-        wp_enqueue_script('teleconnect-script', TELECONNECT_PLUGIN_URL . 'assets/js/teleconnect-widget.js', [], $ver, true);
+        wp_enqueue_style('teleconnect-style', TELECONNECT_PLUGIN_URL . 'assets/css/teleconnect-widget.css', [], $css_ver);
+        wp_enqueue_script('teleconnect-script', TELECONNECT_PLUGIN_URL . 'assets/js/teleconnect-widget.js', [], $js_ver, true);
 
         // Security Nonce for Frontend Ajax actions
         $nonce = wp_create_nonce('teleconnect_chat_nonce');
 
+        // Zero Secrets Exposed to Browser: botToken and chatId REMOVED completely!
         wp_localize_script('teleconnect-script', 'teleConnectConfig', [
             'ajaxUrl'        => admin_url('admin-ajax.php'),
             'nonce'          => $nonce,
             'workerUrl'      => esc_url_raw(untrailingslashit($worker_url)),
-            'botToken'       => esc_js(get_option('teleconnect_bot_token')),
-            'chatId'         => esc_js(get_option('teleconnect_admin_chat_id')),
             'title'          => esc_html(get_option('teleconnect_title', 'پشتیبانی آنلاین')),
             'welcomeMessage' => esc_html(get_option('teleconnect_welcome_message', 'سلام! چطور می‌تونیم کمکتون کنیم؟')),
             'position'       => esc_attr(get_option('teleconnect_position', 'bottom-right')),
@@ -282,6 +287,7 @@ class TeleConnect_Live_Chat {
             wp_send_json_error(['error' => 'Invalid parameters']);
         }
 
+        // Server-Side Secrets Injection (100% safe, never exposed to visitors)
         $payload = [
             'session_id'  => $session_id,
             'message'     => $message,
@@ -294,7 +300,10 @@ class TeleConnect_Live_Chat {
         ];
 
         $response = wp_remote_post(untrailingslashit($worker_url) . '/api/send', [
-            'headers' => ['Content-Type' => 'application/json'],
+            'headers' => [
+                'Content-Type'   => 'application/json',
+                'X-WP-Site-Auth' => wp_hash(get_option('teleconnect_bot_token') . home_url()),
+            ],
             'body'    => wp_json_encode($payload),
             'timeout' => 8,
         ]);

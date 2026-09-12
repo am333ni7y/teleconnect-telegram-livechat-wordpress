@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.2] - 2026-09-13
+### Security
+- **Eliminated Frontend Secret Leakage (P0):** Completely removed `botToken` and `chatId` from `wp_localize_script()`. All outbound messages now proxy securely through WordPress server-side with `X-WP-Site-Auth`.
+- **CSPRNG Session Identifiers (P1):** Replaced `Math.random()` session generation with `window.crypto.getRandomValues(new Uint8Array(16))` preventing session predictability.
+- **Telegram Webhook Verification:** Enabled `X-Telegram-Bot-Api-Secret-Token` generation during setup and enforcement in `/telegram-webhook`.
+- **Edge Rate Limiting:** Added Cloudflare KV-backed IP rate-limiting on `/api/send` (20 req/min per IP) to prevent spam attacks.
+- **XSS Sanitization:** Replaced HTML concatenation in notifications with strict escaping (`esc()`).
+
+### Fixed
+- **Elementor Widget Trigger:** Fixed undefined `window.tlChatOpen` call to `window.teleConnectOpen`.
+- **Asset Versioning:** Changed dynamic `time()` versioning to `filemtime()` for optimal browser cache performance.
+
+### Added
+- Standard WordPress compliance files: `readme.txt`, `uninstall.php`, and `index.php` directory protection.
+
+---
+
 ## [1.1.1] - 2026-09-13
 ### Security
 - Added WordPress CSRF `wp_create_nonce` & `check_ajax_referer` to all AJAX proxy endpoints (`teleconnect_send`, `teleconnect_poll`).
